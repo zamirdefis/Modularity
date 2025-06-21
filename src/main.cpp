@@ -2,7 +2,8 @@
 #include <stdlib.h>
 #include <macros.hpp>
 
-[[nodiscard]] extern auto main(int argc, char* argv[]) ->decltype(argc) {
+[[nodiscard, gnu::noinline]] extern auto
+main(signed int argc, const char** argv) -> decltype(argc) {
   printf("HeLLOwOrld! >_<"); ENDLN;
   return EXIT_SUCCESS;
 }

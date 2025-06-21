@@ -1,2 +1,2 @@
 eval "$(./getAbsolutePath.sh)"
-cmake --build ${paths["build"]} --config debug
+cmake --build ${paths["build"]} --config Debug
