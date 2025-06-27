@@ -1,4 +1,4 @@
-eval $(./getAbsolutePath.sh)
+eval $(./dependencies.sh)
 generator="Ninja Multi-Config"
 
 rmCmakeTrash() {

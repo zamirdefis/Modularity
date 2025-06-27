@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-set(PROJECT_NAME "formatter")
+file(STRINGS "binName.txt" PROJECT_NAME)
 project(${PROJECT_NAME})
 
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -15,6 +15,7 @@ message(${PATH_SRC}/main.cpp)
 
 set(SOURCES 
   ${PATH_SRC}/main.cpp
+  ${PATH_SRC}/notifications.cpp
 )
 
 add_executable(${PROJECT_NAME} ${SOURCES})

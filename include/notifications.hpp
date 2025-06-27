@@ -1,0 +1,12 @@
+#pragma once
+#include <string>
+#define ERROR_PREFIX "[X]"
+#define WARNING_PREFIX "[!]"
+#define MSG_PREFIX "[#]"
+namespace co {
+extern void error(const std::string& str);
+}
+
+#define NE_1 "Incorrect argument"
+#define NE_2 "Couldn't parse the argument"
+
