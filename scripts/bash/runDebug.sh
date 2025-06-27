@@ -1,2 +1,2 @@
 eval "$(./dependencies.sh)"
-${paths["debugBin"]}
+${paths["debugBin"]} "$@"
