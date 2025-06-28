@@ -3,12 +3,13 @@
 #include <cstdint>
 #include <string>
 #include <vector>
+#include <queue>
 
 #include "notifications.hpp"
 #include "macros.hpp"
 
-#define IN_CODE_ARGS
-#define TEST_ARGS_PARSER
+// #define IN_CODE_ARGS
+// #define TEST_ARGS_PARSER
 
 enum class ArgType : uint8_t {
   Invalid,
@@ -44,8 +45,7 @@ enum class ArgType : uint8_t {
   std::vector<std::pair<std::string, std::string>> result{};
   if (ArgType argInfo = getArgType(fullArg); argInfo == ArgType::Invalid) {
     co::error(static_cast<std::string>(NE_1) + " : \"" + fullArg + "\"");
-    return result;
-  } else if (argInfo == ArgType::Brief) {
+    return result; } else if (argInfo == ArgType::Brief) {
     for (std::string::const_iterator citer = fullArg.cbegin() + 1u;
     citer != fullArg.cend(); ++citer) {
       result.push_back(std::make_pair(std::string(1, *citer), ""));
@@ -61,117 +61,11 @@ enum class ArgType : uint8_t {
 
 [[nodiscard, gnu::noinline]] extern auto
 main(signed int argc, const char** argv) -> decltype(argc) {
- // std::string test("-zalupka");
   std::vector<std::string> argvs;
 #ifdef IN_CODE_ARGS
-  // argvs = {"--z=l", "--kkkk=1234", "--o=", "--help", "--H", "--", "---kkk", "-h", "", "-", "-=", "-a=z"};
-  argvs = {
-    // Корректные (должны работать)
-    "-a",                     // краткий флаг
-    "--long",                 // длинный флаг без значения
-    "-abc",                   // комбинированные флаги → a, b, c
-    "--key=value",            // стандартный ключ-значение
-    "--key = value",          // пробелы вокруг =
-    "--key= val ue ",         // пробелы в значении
-    "--!@=!@#$%^",           // спецсимволы
-    "--к ey=зна чение",       // Unicode с пробелами
-    "--東京=Tok yo",          // иероглифы
-    "--key=",                 // пустое значение
-    "--key=val\nue",          // управляющие символы
-    
-    // Некорректные (должны вызывать ошибку)
-    "-a=value",               // сокращённые аргументы не принимают значения
-    "-abc=123",               // комбинированные флаги с значением
-    "--=value",               // пустой ключ
-    "-",                      // просто дефис
-    "--",                     // двойной дефис
-    "key=value",              // нет префикса
-    "--key value",            // пробел вместо =
-    "-- key=value",           // пробел после --
-    "-1",                     // цифра вместо буквы
-    "-=",                     // некорректный символ
-    "",                       // пустая строка
-    
-    // Ваши оригинальные примеры
-    "--z=l", 
-    "--kkkk=1234",
-    "--o=",
-    "--help",
-    "--H",
-    "--",
-    "---kkk",
-    "-h",
-    "-",
-    "-=",
-    "-a=z"
-};
-//   argvs = {
-//     // Стандартные кейсы
-//     "-a",
-//     "--long",
-//     "-abc",
-//     "--key=value",
-//     "--option=123",
-//     "--flag=",
-//     "-f=value",
-//
-//     // Граничные случаи
-//     "",
-//     "-",
-//     "--",
-//     "---",
-//     "-=",
-//     "--=value",
-//     "-=value",
-//     " -a",
-//     "-- key=value",
-//     "--key =value",
-//     "--key= value",
-//     "--key=val ue",
-//
-//     // Специальные символы
-//     "--!@#$%",
-//     "--key=!@#$%",
-//     "--key=value1;value2",
-//     "--key=value\nvalue",
-//     "--key=\"value\"",
-//     "--key='value'",
-//
-//     // Unicode и международные символы
-//     "--ключ=значение",
-//     "--東京=東京",
-//     "--key=😊",
-//     "--münchen=ümlaut",
-//
-//     // Некорректные форматы
-//     "a",
-//     "-1",
-//     "--123=456",
-//     "-a=b=c",
-//     "--key value",
-//     "key=value",
-//     "-a -b",
-//     "--key==value",
-//
-//     // Длинные значения
-//     "--key=" + std::string(1000, 'a'),
-//     // "-" + std::string(100, 'b'),
-//     "--" + std::string(100, 'c'),
-//
-//     // Ваши оригинальные тесты
-//     "--z=l",
-//     "--kkkk=1234",
-//     "--o=",
-//     "--help",
-//     "--H",
-//     "--",
-//     "---kkk",
-//     "-h",
-//     "-",
-//     "-=",
-//     "-a=z"
-// };
+  argvs = {"--z=l", "--kkkk=1234", "--o=", "--help", "--H", "--", "---kkk", "-h", "", "-", "-=", "-a=z"};
 #else
+  
   if (argc == 1) { 
     //cout --help
     return EXIT_SUCCESS;
@@ -179,8 +73,10 @@ main(signed int argc, const char** argv) -> decltype(argc) {
   uint32_t index = 1u;
   while (index < argc) {
     argvs.push_back( *(argv + index) );
+    ++index;
   }
 #endif
+  std::vector<std::pair<std::string, std::string>> parsedArgs;
   for (const std::string& fullArg : argvs) {
     auto parsedArg = parseArg(fullArg);
     if (parsedArg.size() == NULL) {
@@ -191,16 +87,30 @@ main(signed int argc, const char** argv) -> decltype(argc) {
       return EXIT_FAILURE;
 #endif
     }
-#ifdef TEST_ARGS_PARSER
     for (const std::pair<std::string, std::string>& el : parsedArg) {
-      printf("%s  :  %s", el.first.c_str(), el.second.c_str()); ENDLN;
-    }
-    continue;
+#ifdef TEST_ARGS_PARSER
+      printf("%s:%s", el.first.c_str(), el.second.c_str()); ENDLN;
 #else
+      parsedArgs.push_back(el);
 #endif
+    }
+  }
+  // void (*(*pfa[10])(int))(int);
+  using argType = std::pair<std::string, std::string>;
+  using partsType = std::pair<int32_t, std::vector<argType>>;
+  std::priority_queue<partsType, std::vector<partsType>, auto(*)(const partsType&, const partsType&)->bool> parts{ [](const partsType& a, const partsType& b){ return a.first < b.first; } };
+  partsType tmp{INT32_MAX,};
+  for (std::pair<std::string, std::string> arg : parsedArgs) {
+    if (arg.first == "new_part") {
+      
+    }
   }
   return EXIT_SUCCESS;
 }
 
+#ifdef IN_CODE_ARGS
 #undef IN_CODE_ARGS
+#endif
+#ifdef TEST_ARGS_PARSER
 #undef TEST_ARGS_PARSER
+#endif
