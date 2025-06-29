@@ -4,11 +4,12 @@
 #include <string>
 #include <vector>
 #include <queue>
+#include <climits>
 
 #include "notifications.hpp"
 #include "macros.hpp"
 
-// #define IN_CODE_ARGS
+#define IN_CODE_ARGS
 // #define TEST_ARGS_PARSER
 
 class formatter_t {
@@ -94,21 +95,37 @@ enum class ArgType : uint8_t {
   return {std::make_pair(fullArg.substr(2u, fullArg.size() - 2u), "")};
 }
 
+int argValueToInt(const std::pair<std::string, std::string>& arg, int argIndex, bool& success) {
+  int result;
+  try {
+    result = std::stoi(arg.second);
+  } catch(...) {
+    co::error(static_cast<std::string>(NE_3) + " [" +
+              std::to_string(argIndex) + "] : " + arg.first + "=" + arg.second);
+    success = false;
+    return INT_MIN;
+  }
+  success = true;
+  return result;
+}
+
 [[nodiscard, gnu::noinline]] extern auto
 main(signed int argc, const char** argv) -> decltype(argc) {
   std::vector<std::string> argvs;
 #ifdef IN_CODE_ARGS
-  argvs = {"--z=l", "--kkkk=1234", "--o=", "--help", "--H", "--", "---kkk", "-h", "", "-", "-=", "-a=z"};
+  argvs = { "--value=60", "--new_part=40", "--prefix=p", "--new_part=50", "--prefix=o", "--new_part=70", "--prefix=z",};
 #else
   
   if (argc == 1) { 
     //cout --help
     return EXIT_SUCCESS;
   }
-  uint32_t index = 1u;
-  while (index < argc) {
-    argvs.push_back( *(argv + index) );
-    ++index;
+  {
+    uint32_t index = 1u;
+    while (index < argc) {
+      argvs.push_back( *(argv + index) );
+      ++index;
+    }
   }
 #endif
   std::vector<std::pair<std::string, std::string>> parsedArgs;
@@ -137,38 +154,44 @@ main(signed int argc, const char** argv) -> decltype(argc) {
   size_t argIndex = NULL;
   bool canChange = true;
   for (const std::pair<std::string, std::string>& arg : parsedArgs) {
-    ++index;
-    // if (arg.second.size() > NULL) {
-    //
-    // }
-    if (arg.first == "new_part" && arg.second.size() > NULL) {
-      int32_t partValue;
-      try {
-        partValue = std::stoi(arg.second);
-      } catch(...) {
-        co::error(static_cast<std::string>(NE_3) + " [" +
-        std::to_string(argIndex) + "] : " + arg.first + "=" + arg.second);
-        return EXIT_FAILURE;
+    ++argIndex;
+    if (arg.second.size() > NULL) {
+      if (arg.first == "value") {
+        if (arg.second == "CPU") {
+          //something
+        } else if (arg.second == "RAM") {
+          //something
+        } else {
+          bool success;
+          int32_t valueInArg = argValueToInt(arg, argIndex, success);
+          if (!success) { continue; }
+          value = valueInArg;
+        }
       }
-      if (partValue >= bestValue && partValue > value) {
-        formatter.custom->reset();
-        bestValue = partValue;
-        canChange = true;
-        continue;
-      } else {
-        canChange = false;
-      }
-    } // add here some co::error's
-    if (canChange) {
-      if (arg.first == "prefix") {
-        formatter.custom->prefix = arg.second;
-      } else if (arg.first == "postfix") {
-        formatter.custom->postfix = arg.second;
-      } else if (arg.first == "prefix_color") {
-        formatter.custom->prefixColor = arg.second;
-      } else if (arg.first == "postfix_color") {
-        formatter.custom->postfixColor = arg.second;
-      }
+      if (arg.first == "new_part") {
+        bool success;
+        int32_t partValue = argValueToInt(arg, argIndex, success);
+        if (!success) { continue; }
+        if (partValue >= bestValue && value > partValue) {
+          formatter.custom->reset();
+          bestValue = partValue;
+          canChange = true;
+          continue;
+        } else {
+          canChange = false;
+        }
+      } // add here some co::error's
+      if (canChange) {
+        if (arg.first == "prefix") {
+          formatter.custom->prefix = arg.second;
+        } else if (arg.first == "postfix") {
+          formatter.custom->postfix = arg.second;
+        } else if (arg.first == "prefix_color") {
+          formatter.custom->prefixColor = arg.second;
+        } else if (arg.first == "postfix_color") {
+          formatter.custom->postfixColor = arg.second;
+        }
+      }  
     }
   }
   printf("%s", formatter.getFormatStr().c_str()); ENDLN;
