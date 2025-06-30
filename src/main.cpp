@@ -21,7 +21,6 @@ class formatter_t {
     std::string prefixColor = "";
     std::string postfixColor = "";
     void reset(void) {
-      this->value = "0";
       this->postfix = "?";
       this->prefix = "?";
       this->valueColor.clear();
@@ -113,7 +112,7 @@ int argValueToInt(const std::pair<std::string, std::string>& arg, int argIndex, 
 main(signed int argc, const char** argv) -> decltype(argc) {
   std::vector<std::string> argvs;
 #ifdef IN_CODE_ARGS
-  argvs = { "--value=60", "--new_part=40", "--prefix=p", "--new_part=50", "--prefix=o", "--new_part=70", "--prefix=z",};
+  argvs = { "--value=60", "--new_part=50", "--prefix=val",};
 #else
   
   if (argc == 1) { 
@@ -166,6 +165,7 @@ main(signed int argc, const char** argv) -> decltype(argc) {
           int32_t valueInArg = argValueToInt(arg, argIndex, success);
           if (!success) { continue; }
           value = valueInArg;
+          formatter.custom->value = std::to_string(value);
         }
       }
       if (arg.first == "new_part") {
