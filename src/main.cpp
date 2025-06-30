@@ -12,9 +12,12 @@
 #define IN_CODE_ARGS
 // #define TEST_ARGS_PARSER
 
+#define CENE_WITH_ARG(NE, ARG, ARG_INDEX) co::error(static_cast<std::string>(NE) + " [" +\
+              std::to_string(ARG_INDEX) + "] : " + ARG.first + "=" + ARG.second)
+
+
 class formatter_t {
   struct custom_t {
-    std::string value = "";
     std::string prefix = "";
     std::string postfix = "";
     std::string valueColor = "";
@@ -32,10 +35,13 @@ class formatter_t {
     }
   };
 public:
+  std::string value = "";
+  uint32_t reserved_gaps = NULL;
   custom_t* custom = new custom_t();
   std::string getFormatStr(void) const {
     return (custom->prefixColor == "" ? "" : "${F" + custom->prefixColor + "}") + custom->prefix + 
-    (custom->valueColor == "" ? "" : "${F" + custom->valueColor + "}") + custom->value + 
+    (custom->valueColor == "" ? "" : "${F" + custom->valueColor + "}") + 
+    (value.size() < reserved_gaps ? std::string(reserved_gaps - value.size(), ' ') : "") + value + 
     (custom->postfixColor == "" ? "" : "${F" + custom->postfixColor + "}") + custom->postfix;
   }
   formatter_t() {
@@ -94,13 +100,16 @@ enum class ArgType : uint8_t {
   return {std::make_pair(fullArg.substr(2u, fullArg.size() - 2u), "")};
 }
 
+
+
 int argValueToInt(const std::pair<std::string, std::string>& arg, int argIndex, bool& success) {
   int result;
   try {
     result = std::stoi(arg.second);
   } catch(...) {
-    co::error(static_cast<std::string>(NE_3) + " [" +
-              std::to_string(argIndex) + "] : " + arg.first + "=" + arg.second);
+    // co::error(static_cast<std::string>(NE_3) + " [" +
+    //           std::to_string(argIndex) + "] : " + arg.first + "=" + arg.second);
+    CENE_WITH_ARG(NE_3, arg, argIndex);
     success = false;
     return INT_MIN;
   }
@@ -112,7 +121,7 @@ int argValueToInt(const std::pair<std::string, std::string>& arg, int argIndex, 
 main(signed int argc, const char** argv) -> decltype(argc) {
   std::vector<std::string> argvs;
 #ifdef IN_CODE_ARGS
-  argvs = { "--value=60", "--new_part=50", "--prefix=val",};
+  argvs = { "--value=60", "--reserved_gaps=-2",};
 #else
   
   if (argc == 1) { 
@@ -165,8 +174,18 @@ main(signed int argc, const char** argv) -> decltype(argc) {
           int32_t valueInArg = argValueToInt(arg, argIndex, success);
           if (!success) { continue; }
           value = valueInArg;
-          formatter.custom->value = std::to_string(value);
+          formatter.value = std::to_string(value);
         }
+      }
+      if (arg.first == "reserved_gaps") {
+        bool success;
+        int32_t valueInArg = argValueToInt(arg, argIndex, success);
+        if (valueInArg < NULL) {
+          success = false;
+          CENE_WITH_ARG(NE_4, arg, argIndex);
+        }
+        if (!success) { continue; }
+        formatter.reserved_gaps = valueInArg;
       }
       if (arg.first == "new_part") {
         bool success;
