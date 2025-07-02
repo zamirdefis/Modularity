@@ -16,6 +16,7 @@ message(${PATH_SRC}/main.cpp)
 set(SOURCES 
   ${PATH_SRC}/main.cpp
   ${PATH_SRC}/notifications.cpp
+  ${PATH_SRC}/mem.cpp
 )
 
 add_executable(${PROJECT_NAME} ${SOURCES})

@@ -5,11 +5,14 @@
 #include <vector>
 #include <queue>
 #include <climits>
+#include <unistd.h>
+#include <cmath>
 
 #include "notifications.hpp"
 #include "macros.hpp"
+#include "mem.hpp"
 
-#define IN_CODE_ARGS
+// #define IN_CODE_ARGS
 // #define TEST_ARGS_PARSER
 
 #define CENE_WITH_ARG(NE, ARG, ARG_INDEX) co::error(static_cast<std::string>(NE) + " [" +\
@@ -121,7 +124,7 @@ int argValueToInt(const std::pair<std::string, std::string>& arg, int argIndex, 
 main(signed int argc, const char** argv) -> decltype(argc) {
   std::vector<std::string> argvs;
 #ifdef IN_CODE_ARGS
-  argvs = { "--value=60", "--reserved_gaps=-2",};
+  argvs = { "--value=RAM", };
 #else
   
   if (argc == 1) { 
@@ -165,10 +168,13 @@ main(signed int argc, const char** argv) -> decltype(argc) {
     ++argIndex;
     if (arg.second.size() > NULL) {
       if (arg.first == "value") {
-        if (arg.second == "CPU") {
-          //something
-        } else if (arg.second == "RAM") {
-          //something
+        if (arg.second == "RAM") {
+          mem_t mem;
+          if (!getRAM(mem)) { continue; }
+          value = std::round(((long double)mem.MemTotal - mem.MemFree) / mem.MemTotal * 100.0L);
+          formatter.value = std::to_string(value);
+        } else if (arg.second == "CPU") {
+          
         } else {
           bool success;
           int32_t valueInArg = argValueToInt(arg, argIndex, success);
