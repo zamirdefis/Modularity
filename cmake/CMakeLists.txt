@@ -17,6 +17,7 @@ set(SOURCES
   ${PATH_SRC}/main.cpp
   ${PATH_SRC}/notifications.cpp
   ${PATH_SRC}/mem.cpp
+  ${PATH_SRC}/argsParser.cpp
 )
 
 add_executable(${PROJECT_NAME} ${SOURCES})
