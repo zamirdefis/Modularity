@@ -1,7 +1,7 @@
 #pragma once
 
 #define CENE_WITH_ARG(NE, ARG, ARG_INDEX) co::error(static_cast<std::string>(NE) + " [" +\
-              std::to_string(ARG_INDEX) + "] : " + ARG.first + "=" + ARG.second)
+              std::to_string(ARG_INDEX) + "] : " + ARG.main + "=" + ARG.value)
 
 #include <cstdint>
 #include <vector>
@@ -25,6 +25,6 @@ enum class ArgType : uint8_t {
 
 [[nodiscard]] ArgType getArgType(std::string_view fullArg);
 
-[[nodiscard]] std::vector<std::pair<std::string, std::string>> parseArg(const std::string& fullArg);
+[[nodiscard]] std::vector<arg_t> parseArg(const std::string& fullArg);
 
-int argValueToInt(const std::pair<std::string, std::string>& arg, int argIndex, bool& success);
+int argValueToInt(const arg_t& arg, int argIndex, bool& success);

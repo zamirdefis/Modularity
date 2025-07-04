@@ -14,13 +14,6 @@
 #include "argsParser.hpp"
 
 // #define IN_CODE_ARGS
-// #define TEST_ARGS_PARSER
-
-// #define SET_GET_VAL(TYPE, NAME) private:\
-//   TYPE NAME##_;\
-// public:\
-//   get
-
 
 class formatter_t final {
   class custom_t final {
@@ -112,41 +105,30 @@ main(signed int argc, const char** argv) -> decltype(argc) {
     }
   }
 #endif
-  std::vector<std::pair<std::string, std::string>> parsedArgs;
+  std::vector<arg_t> parsedArgs;
   for (const std::string& fullArg : argvs) {
     auto parsedArg = parseArg(fullArg);
     if (parsedArg.size() == NULL) {
       co::error(static_cast<std::string>(NE_2) + " : \"" + fullArg + "\"");
-#ifdef TEST_ARGS_PARSER
-      continue;
-#else
       return EXIT_FAILURE;
-#endif
     }
-    for (const std::pair<std::string, std::string>& el : parsedArg) {
-#ifdef TEST_ARGS_PARSER
-      printf("%s:%s", el.first.c_str(), el.second.c_str()); ENDLN;
-#else
-      parsedArgs.push_back(el);
-#endif
+    for (const arg_t& arg : parsedArg) {
+      parsedArgs.push_back(arg);
     }
   }
-#ifdef TEST_ARGS_PARSER
-  return EXIT_SUCCESS;
-#endif 
   int32_t bestValue = INT32_MIN, value = INT32_MIN;
   size_t argIndex = NULL;
   bool canChange = true;
-  for (const std::pair<std::string, std::string>& arg : parsedArgs) {
+  for (const arg_t& arg : parsedArgs) {
     ++argIndex;
-    if (arg.second.size() > NULL) {
-      if (arg.first == "value") {
-        if (arg.second == "RAM") {
+    if (arg.value.size() > NULL) {
+      if (arg.main == "value") {
+        if (arg.value == "RAM") {
           mem_t mem;
           if (!getRAM(mem)) { continue; }
           value = std::round(((long double)mem.MemTotal - mem.MemFree) / mem.MemTotal * 100.0L);
           formatter.value = std::to_string(value);
-        } else if (arg.second == "CPU") {
+        } else if (arg.value == "CPU") {
           
         } else {
           bool success;
@@ -156,7 +138,7 @@ main(signed int argc, const char** argv) -> decltype(argc) {
           formatter.value = std::to_string(value);
         }
       }
-      if (arg.first == "reserved_gaps") {
+      if (arg.main == "reserved_gaps") {
         bool success;
         int32_t valueInArg = argValueToInt(arg, argIndex, success);
         if (valueInArg < NULL) {
@@ -166,7 +148,7 @@ main(signed int argc, const char** argv) -> decltype(argc) {
         if (!success) { continue; }
         formatter.reserved_gaps = valueInArg;
       }
-      if (arg.first == "new_part") {
+      if (arg.main == "new_part") {
         bool success;
         int32_t partValue = argValueToInt(arg, argIndex, success);
         if (!success) { continue; }
@@ -180,14 +162,14 @@ main(signed int argc, const char** argv) -> decltype(argc) {
         }
       } // add here some co::error's
       if (canChange) {
-        if (arg.first == "prefix") {
-          formatter.custom->setPrefix(arg.second);
-        } else if (arg.first == "postfix") {
-          formatter.custom->setPostfix(arg.second);
-        } else if (arg.first == "prefix_color") {
-          formatter.custom->setPrefixColor(arg.second);
-        } else if (arg.first == "postfix_color") {
-          formatter.custom->setPostfixColor(arg.second);
+        if (arg.main == "prefix") {
+          formatter.custom->setPrefix(arg.value);
+        } else if (arg.main == "postfix") {
+          formatter.custom->setPostfix(arg.value);
+        } else if (arg.main == "prefix_color") {
+          formatter.custom->setPrefixColor(arg.value);
+        } else if (arg.main == "postfix_color") {
+          formatter.custom->setPostfixColor(arg.value);
         }
       }  
     }
