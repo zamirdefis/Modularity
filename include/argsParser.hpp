@@ -7,6 +7,15 @@
 #include <vector>
 #include <string>
 
+class arg_t final {
+public:
+  std::string main;
+  std::string value;
+  arg_t(void);
+  arg_t(std::string_view);
+  arg_t(std::string_view, std::string_view);
+};
+
 enum class ArgType : uint8_t {
   Invalid,
   Brief,

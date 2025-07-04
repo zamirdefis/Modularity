@@ -3,6 +3,10 @@
 
 #include <climits>
 
+arg_t::arg_t() : main(""), value("") {}
+arg_t::arg_t(std::string_view main) : main(main), value("")  {}
+arg_t::arg_t(std::string_view main, std::string_view value) : main(main), value(value) {}
+
 [[nodiscard]] ArgType getArgType(std::string_view fullArg) {
   size_t realPartIndex;
   // printf("%d", (fullArg.size() < 2u || fullArg.front() != '-' 
@@ -51,8 +55,6 @@ int argValueToInt(const std::pair<std::string, std::string>& arg, int argIndex, 
   try {
     result = std::stoi(arg.second);
   } catch(...) {
-    // co::error(static_cast<std::string>(NE_3) + " [" +
-    //           std::to_string(argIndex) + "] : " + arg.first + "=" + arg.second);
     CENE_WITH_ARG(NE_3, arg, argIndex);
     success = false;
     return INT_MIN;

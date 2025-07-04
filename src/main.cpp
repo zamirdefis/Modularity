@@ -16,22 +16,61 @@
 // #define IN_CODE_ARGS
 // #define TEST_ARGS_PARSER
 
-class formatter_t {
-  struct custom_t {
-    std::string prefix = "";
-    std::string postfix = "";
-    std::string valueColor = "";
-    std::string prefixColor = "";
-    std::string postfixColor = "";
+// #define SET_GET_VAL(TYPE, NAME) private:\
+//   TYPE NAME##_;\
+// public:\
+//   get
+
+
+class formatter_t final {
+  class custom_t final {
+  private:
+    std::string prefix_ = "";
+    std::string postfix_ = "";
+    std::string valueColor_ = "";
+    std::string prefixColor_ = "";
+    std::string postfixColor_ = "";
+  public:
     void reset(void) {
-      this->postfix = "?";
-      this->prefix = "?";
-      this->valueColor.clear();
-      this->valueColor.shrink_to_fit();
-      this->prefixColor.clear();
-      this->prefixColor.shrink_to_fit();
-      this->postfixColor.clear();
-      this->postfixColor.shrink_to_fit();
+      postfix_ = "?";
+      prefix_ = "?";
+      valueColor_.clear();
+      valueColor_.shrink_to_fit();
+      prefixColor_.clear();
+      prefixColor_.shrink_to_fit();
+      postfixColor_.clear();
+      postfixColor_.shrink_to_fit();
+    }
+    void setPrefix(std::string_view prefix) {
+      prefix_ = prefix;
+    }
+    void setPostfix(std::string_view postfix) {
+      postfix_ = postfix;
+    }
+    void setValueColor(std::string_view valueColor) {
+      valueColor_ = valueColor;
+    }
+    void setPrefixColor(std::string_view prefixColor) {
+      prefixColor_ = prefixColor;
+    }
+    void setPostfixColor(std::string_view postfixColor) {
+      postfixColor_ = postfixColor;
+    }
+    
+    const std::string& getPrefix(void) {
+      return prefix_;
+    }
+    const std::string& getPostfix(void) {
+      return postfix_;
+    }
+    const std::string& getValueColor(void) {
+      return valueColor_;
+    }
+    const std::string& getPrefixColor(void) {
+      return prefixColor_;
+    }
+    const std::string& getPostfixColor(void) {
+      return postfixColor_;
     }
   };
 public:
@@ -39,10 +78,10 @@ public:
   uint32_t reserved_gaps = NULL;
   custom_t* custom = new custom_t();
   std::string getFormatStr(void) const {
-    return (custom->prefixColor == "" ? "" : "${F" + custom->prefixColor + "}") + custom->prefix + 
-    (custom->valueColor == "" ? "" : "${F" + custom->valueColor + "}") + 
+    return (custom->getPrefixColor() == "" ? "" : "${F" + custom->getPrefixColor() + "}") + custom->getPrefix() + 
+    (custom->getValueColor() == "" ? "" : "${F" + custom->getValueColor() + "}") + 
     (value.size() < reserved_gaps ? std::string(reserved_gaps - value.size(), ' ') : "") + value + 
-    (custom->postfixColor == "" ? "" : "${F" + custom->postfixColor + "}") + custom->postfix;
+    (custom->getPostfixColor() == "" ? "" : "${F" + custom->getPostfixColor() + "}") + custom->getPostfix();
   }
   formatter_t() {
     custom->reset();
@@ -142,13 +181,13 @@ main(signed int argc, const char** argv) -> decltype(argc) {
       } // add here some co::error's
       if (canChange) {
         if (arg.first == "prefix") {
-          formatter.custom->prefix = arg.second;
+          formatter.custom->setPrefix(arg.second);
         } else if (arg.first == "postfix") {
-          formatter.custom->postfix = arg.second;
+          formatter.custom->setPostfix(arg.second);
         } else if (arg.first == "prefix_color") {
-          formatter.custom->prefixColor = arg.second;
+          formatter.custom->setPrefixColor(arg.second);
         } else if (arg.first == "postfix_color") {
-          formatter.custom->postfixColor = arg.second;
+          formatter.custom->setPostfixColor(arg.second);
         }
       }  
     }
