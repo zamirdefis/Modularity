@@ -51,6 +51,7 @@ bool getRAM(mem_t& res) {
   std::unordered_map<std::string, ull_t>* memInfoUMapPtr = getMemInfoMap();
   if (memInfoUMapPtr->find("MemTotal") == memInfoUMapPtr->end() || memInfoUMapPtr->find("MemFree") == memInfoUMapPtr->end()) {
     delete memInfoUMapPtr;
+    return false;
   }
   res.MemFree = (*memInfoUMapPtr)["MemAvailable"];
   res.MemTotal = (*memInfoUMapPtr)["MemTotal"];
