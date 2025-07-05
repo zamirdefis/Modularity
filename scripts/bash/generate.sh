@@ -2,12 +2,9 @@ eval $(./dependencies.sh)
 generator="Ninja Multi-Config"
 
 rmCmakeTrash() {
-  echo -e "deleting a \"build/\" directory"
-  rm -rf ${paths["build"]}
-  echo -e "the \"build/\" directory has been deleted\n"
-  # echo -e "deleting a \".cache/\" directory"
-  # rm -rf ${paths[".cache"]}
-  # echo -e "the \".cache/\" directory has been deleted\n"
+  echo -e "clearing the \"build/\" directory"
+  rm -rf ${paths["build"]}/* ${paths["build"]}/.*
+  echo -e "the \"build/\" directory has been cleared\n"
 }
 
 if [ $# -eq 1 ]; then
