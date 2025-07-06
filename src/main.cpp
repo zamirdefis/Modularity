@@ -12,6 +12,7 @@
 #include "macros.hpp"
 #include "mem.hpp"
 #include "argsParser.hpp"
+#include "cpu.hpp"
 
 // #define IN_CODE_ARGS
 
@@ -129,7 +130,13 @@ main(signed int argc, const char** argv) -> decltype(argc) {
           value = std::round(((long double)mem.MemTotal - mem.MemFree) / mem.MemTotal * 100.0L);
           formatter.value = std::to_string(value);
         } else if (arg.value == "CPU") {
-          
+          float usage = getCPUUsage();         
+          if (usage < static_cast<float>(NULL)) { 
+            CENE_WITH_ARG(NE_5, arg, argIndex);
+            continue;
+          }
+          value = std::round(usage);
+          formatter.value = std::to_string(value);
         } else {
           bool success;
           int32_t valueInArg = argValueToInt(arg, argIndex, success);
